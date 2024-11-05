@@ -1,0 +1,14 @@
+[
+  {
+    "task": "saya mau pergi ke pasar",
+    "completed": true
+  },
+  {
+    "task": "saya pergi ke sekolah",
+    "completed": false
+  },
+  {
+    "task": "saya akan memasak",
+    "completed": false
+  }
+]
