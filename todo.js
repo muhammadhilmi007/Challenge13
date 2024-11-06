@@ -194,7 +194,7 @@ function tag(index, ...tags) {
   saveTodos();
   //console.log(`Tag ditambahkan ke "${todo.task}"`);
   console.log(
-    `Tag '${tags.join("")}' telah ditambahkan ke daftar '${todo.task}'`
+    `Tag '${tags.join(" ")}' telah ditambahkan ke daftar '${todo.task}'`
   );
 }
 
