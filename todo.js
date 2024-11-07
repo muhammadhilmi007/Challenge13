@@ -64,8 +64,11 @@ function getTask(id) {
   const todo = findTodoById(id);
   if (todo) {
     const status = todo.completed ? "[X]" : "[ ]";
-    const tags = todo.tags ? ` ${todo.tags.join("")}` : "";
-    console.log(`${todo.id}. ${status} ${todo.content} ${tags}`);
+    const tags = todo.tags ? ` ${todo.tags.join(" ")}` : "";
+    console.log(`Pekerjaan dengan ID: #${todo.id}`);
+    console.log(`Title: ${todo.content}`);
+    console.log(`Complete: ${status}`);
+    console.log(`Tags: ${tags}`);
   } else {
     console.log("Tidak Ada Tugas.");
   }
@@ -162,7 +165,6 @@ function listCompleted(order = "asc") {
     const tags = todo.tags ? `${todo.tags.join("")}` : "";
     console.log(`${todo.id}. [X] ${todo.content}${tags}`);
   });
-
 }
 
 // Menambah Tags pada tugas
@@ -267,6 +269,13 @@ function main() {
 
 // Panggil function (main) untuk memulai Aplikasi
 main();
+
+/* 
+pekerjaan dengan ID 1 : 
+title: saya pergi ke mall
+complete: sudah
+tags: jalan, senang
+*/
 
 /* 
   1. Helper nya diperbaiki

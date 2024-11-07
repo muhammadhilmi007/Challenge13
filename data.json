@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "id": 1,
+    "content": "saya pergi ke mall",
+    "completed": true,
+    "tags": [
+      "jalan",
+      "senang"
+    ],
+    "createdAt": "2024-11-07T03:32:55.403Z"
+  },
+  {
+    "id": 2,
+    "content": "saya main ke batu kuda",
+    "completed": false,
+    "tags": [],
+    "createdAt": "2024-11-07T03:33:00.416Z"
+  },
+  {
+    "id": 3,
+    "content": "saya pergi ke pasar gedebage",
+    "completed": true,
+    "tags": [
+      "jalan"
+    ],
+    "createdAt": "2024-11-07T03:33:08.000Z"
+  },
+  {
+    "id": 4,
+    "content": "saya sholat di masjid",
+    "completed": false,
+    "tags": [],
+    "createdAt": "2024-11-07T03:33:14.448Z"
+  }
+]
