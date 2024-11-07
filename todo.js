@@ -242,7 +242,7 @@ function main() {
 
       tag(args[1], ...args.slice(2));
       break;
-    case "filter":
+    case "filter:":
       if (args.length < 2) {
         console.log("Mohon sertakan: filter <tag_name>");
         break;
@@ -263,7 +263,7 @@ function main() {
       console.log(
         "node todo.js tag <task_id> <tag_name_1> <tag_name_2> ...<tag_name_N"
       );
-      console.log("node todo.js filter:<tag_name>");
+      console.log("node todo.js filter: <tag_name>");
   }
 }
 
