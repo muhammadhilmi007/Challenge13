@@ -40,6 +40,10 @@ function saveTodos() {
   fs.writeFileSync(fileName, JSON.stringify(todos, null, 2));
 }
 
+function findTodoById(id) {
+  return todos.find((todo) => todo.id === parseInt(id));
+}
+
 // Fungsi untuk menampilkan daftar todo list
 function list() {
   console.log("Daftar Pekerjaan");
@@ -50,243 +54,219 @@ function list() {
 
   todos.forEach((todo, index) => {
     const status = todo.completed ? "[X]" : "[ ]";
-    console.log(`${index + 1}. ${status} ${todo.task}`);
+    const tags = todo.tags ? `${todo.tags.join("")}` : "";
+    console.log(`${todo.id}. ${status} ${todo.content} ${tags}`);
   });
 }
 
+// Mengambil tugas dengan ID spesifik
+function getTask(id) {
+  const todo = findTodoById(id);
+  if (todo) {
+    const status = todo.completed ? "[X]" : "[ ]";
+    const tags = todo.tags ? ` ${todo.tags.join("")}` : "";
+    console.log(`${todo.id}. ${status} ${todo.content} ${tags}`);
+  } else {
+    console.log("Tidak Ada Tugas.");
+  }
+}
+
 // Fungsi untuk menambah todo list
-function add(task) {
+function add(content) {
+  const newID = todos.length > 0 ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
   const newTodo = {
-    task: task,
+    id: newID,
+    content: content,
     completed: false,
+    tags: [],
     createdAt: new Date().toISOString(),
   };
   todos.push(newTodo);
   saveTodos();
-  console.log(`"${task}" telah ditambahkan`);
+  console.log(`"${content}" telah ditambahkan`);
 }
 
 // Fungsi untuk menghapus todo
-function deleteTask(index) {
-  if (index < 1 || index > todos.length) {
-    console.log("Index tidak Valid.");
-    return;
+function deleteTask(id) {
+  const index = todos.findIndex((todo) => todo.id === parseInt(id));
+  if (index !== -1) {
+    const removed = todos.splice(index, 1)[0];
+    saveTodos();
+    console.log(`"${removed.content}" telah dihapus dari daftar`);
+  } else {
+    console.log("Tugas tidak ada.");
   }
-
-  const deletedTodo = todos.splice(index - 1, 1);
-  saveTodos();
-  console.log(`"${deletedTodo[0].task}" telah dihapus dari daftar`);
 }
 
 // Fungsi untuk menandai todo sebagai selesai
-function complete(index) {
-  if (index < 1 || index > todos.length) {
-    console.log("Index tidak Valid.");
-    return;
+function complete(id) {
+  const todo = findTodoById(id);
+  if (todo) {
+    todo.completed = true;
+    saveTodos();
+    console.log(`"${todo.content}" telah selesai.`);
+  } else {
+    console.log("Tugas tidak ada.");
   }
-
-  todos[index - 1].completed = true;
-  todos[index - 1].completedAt = new Date().toISOString();
-  saveTodos();
-  console.log(`"${todos[index - 1].task}" telah selesai.`);
 }
 
-function uncomplete(index) {
-  if (index < 1 || index > todos.length) {
-    console.log("Index tidak Valid.");
-    return;
+// Fungsi untuk menghapus dari tanda todo yang selesai
+function uncomplete(id) {
+  const todo = findTodoById(id);
+  if (todo) {
+    todo.completed = false;
+    saveTodos();
+    console.log(`"${todo.content}" status selesai dibatalkan`);
+  } else {
+    console.log("Tugas Tidak Ada.");
   }
-
-  todos[index - 1].completed = false;
-  delete todos[index - 1].completedAt; // Tambah timeStamp
-  saveTodos();
-  console.log(`"${todos[index - 1].task}" status selesai dibatalkan`);
 }
 
-function sortTodos(tasks, order = "asc") {
-  return tasks
-    .map((task, index) => ({ ...task, indexAsli: index + 1 }))
-    .sort((a, b) => {
-      const taskA = a.task.toLowerCase();
-      const taskB = b.task.toLowerCase();
-      if (order === "asc") {
-        return taskA.localeCompare(taskB);
-      }
-      return taskB.localeCompare(taskA);
-    });
-}
-
+// Daftar tugas yang belum dikerjakan
 function listOutStanding(order = "asc") {
-  const outstandingTasks = todos.filter((todo) => !todo.completed);
+  const outstandingTasks = todos
+    .filter((todo) => !todo.completed)
+    .sort((a, b) => {
+      return order === "asc"
+        ? a.createdAt.localeCompare(b.createdAt)
+        : b.createdAt.localeCompare(a.createdAt);
+    });
 
   if (outstandingTasks.length === 0) {
     console.log("Tidak ada pekerjaan yang belum selesai.");
     return;
   }
 
-  if (order === "desc") {
-    console.log("Daftar Pekerjaan yang belum selesai.");
-    [...outstandingTasks].reverse().forEach((todo, index) => {
-      const taskNumber = outstandingTasks.length - index;
-      console.log(`${taskNumber}. [ ] ${todo.task}`);
-      // if (todo.tags && todo.tags.length > 0) {
-      //   console.log(`Tags: ${todo.tags.join(",")}`);
-      // }
-    });
-  } else {
-    console.log("Daftar Pekerjaan yang belum selesai.");
-    outstandingTasks.forEach((todo, index) => {
-      console.log(`${index + 1}. [ ] ${todo.task}`);
-      // if (todo.tags && todo.tags.length > 0) {
-      //   console.log(`Tags: ${todo.tags.join(", ")}`);
-      // }
-    });
-  }
+  outstandingTasks.forEach((todo) => {
+    const tags = todo.tags ? `${todo.tags.join("")}` : "";
+    console.log(`${todo.id}. [ ] ${todo.content}${tags}`);
+  });
 }
 
+// Daftar tugas yang sudah dikerjakan
 function listCompleted(order = "asc") {
-  const completedTask = todos.filter((todo) => todo.completed);
+  const completedTask = todos
+    .filter((todo) => todo.completed)
+    .sort((a, b) => {
+      return order === "asc"
+        ? a.createdAt.localeCompare(b.createdAt)
+        : b.createdAt.localeCompare(a.createdAt);
+    });
 
   if (completedTask.length === 0) {
     console.log("Tidak ada Pekerjaan yang sudah selesai.");
     return;
   }
 
-  if (order == "desc") {
-    console.log("Daftar Pekerjaan yagn sudah selesai.");
-    [...completedTask].reverse().forEach((todo, index) => {
-      const taskNumber = completedTask.length - index;
-      console.log(`${taskNumber}. [X] ${todo.task}`);
-      // if (todo.tags && todo.tags.length > 0) {
-      //   console.log(`Tags: ${todo.tags.join(",")}`);
-      // }
-    });
-  } else {
-    console.log("Daftar Pekerjaan yang sudah selesai.");
-    completedTask.forEach((todo, index) => {
-      console.log(`${index + 1}. [X] ${todo.task}`);
-      // if (todo.tags && todo.tags.length > 0) {
-      //   console.log(`Tags: ${todo.tags.join(", ")}`);
-      // }
-    });
-  }
-}
-
-function tag(index, ...tags) {
-  if (index < 1 || index > todos.length) {
-    console.log("Index tidak Valid.");
-    return;
-  }
-
-  const todo = todos[index - 1];
-  // Inisialisasi Array tags jika belum ada
-  if (!todo.tags) {
-    todo.tags = [];
-  }
-
-  // Tambahkan tags baru ke Array tags yang ada
-  tags.forEach((tag) => {
-    if (!todo.tags.includes(tag)) {
-      todo.tags.push(tag);
-    }
+  completedTask.forEach((todo) => {
+    const tags = todo.tags ? `${todo.tags.join("")}` : "";
+    console.log(`${todo.id}. [X] ${todo.content}${tags}`);
   });
-  // todo.task = `${todo.task} ${tags.join(" ,")}`;
-  saveTodos();
-  //console.log(`Tag ditambahkan ke "${todo.task}"`);
-  console.log(
-    `Tag '${tags.join(" ")}' telah ditambahkan ke daftar '${todo.task}'`
-  );
+
 }
 
+// Menambah Tags pada tugas
+function tag(id, ...tags) {
+  const todo = findTodoById(id);
+  if (todo) {
+    todo.tags = todo.tags || [];
+    todo.tags.push(...tags);
+    todo.tags = [...new Set(todo.tags)];
+    saveTodos();
+    console.log(
+      `Tag '${tags.join(" ")}' telah ditambahkan ke daftar '${todo.content}'`
+    );
+  } else {
+    console.log("Tugas Tidak Ada");
+  }
+}
+
+// Memfilter tugas berdasarkan Tags
 function filter(tagName) {
   const filteredTasks = todos.filter(
     (todo) => todo.tags && todo.tags.includes(tagName)
   );
-  console.log(`Daftar Pekerjaan `);
+
   if (filteredTasks.length === 0) {
+    console.log(`Daftar Pekerjaan `);
     return;
   }
-  filteredTasks.forEach((todo, index) => {
+  filteredTasks.forEach((todo) => {
     const status = todo.completed ? "[X]" : "[ ]";
-    console.log(`${index + 1}. ${status} ${todo.task}`);
+    const tags = `${todo.tags.join("")}`;
+    console.log(`${todo.id}. ${status} ${todo.content}`);
   });
 }
 
-loadTodoList();
-const [, , command, ...args] = process.argv;
+// Function untuk membuat Baris Perintah
+function main() {
+  loadTodoList();
 
-switch (command) {
-  case "list":
-    list();
-    break;
-  case "add":
-    if (args.length === 0) {
-      console.log("Mohon sertakan task yang akan ditambahkan");
+  const args = process.argv.slice(2);
+  const command = args[0];
+
+  switch (command) {
+    case "list":
+      list();
       break;
-    }
-    add(args.join(" "));
-    break;
-  case "delete":
-    if (args.length === 0) {
-      console.log("Mohon sertakan index task yang akan dihapus");
+    case "task":
+      getTask(args[1]);
       break;
-    }
-    deleteTask(parseInt(args[0]));
-    break;
-  case "complete":
-    if (args.length === 0) {
-      console.log("Mohon sertakan index task yang akan ditandai selesai.");
+    case "add":
+      add(args.slice(1).join(" "));
       break;
-    }
-    complete(parseInt(args[0]));
-    break;
-  case "uncomplete":
-    if (args.length === 0) {
+    case "delete":
+      deleteTask(args[1]);
+      break;
+    case "complete":
+      complete(args[1]);
+      break;
+    case "uncomplete":
+      uncomplete(args[1]);
+      break;
+    case "list:outstanding":
+      listOutStanding(args[1] || "asc");
+      break;
+    case "list:completed":
+      listCompleted(args[1] || "asc");
+      break;
+    case "tag":
+      if (args.length < 3) {
+        console.log(
+          "Mohon sertakan: tag <task_id> <task_name_1> <task_name_2> "
+        );
+        break;
+      }
+
+      tag(args[1], ...args.slice(2));
+      break;
+    case "filter":
+      if (args.length < 2) {
+        console.log("Mohon sertakan: filter <tag_name>");
+        break;
+      }
+      filter(args[1]);
+      break;
+    default:
+      console.log(">>> JS TODO <<<");
+      console.log("node todo.js <command>");
+      console.log("node todo.js list");
+      console.log("node todo.js task <task_id>");
+      console.log("node todo.js add <task_content>");
+      console.log("node todo.js delete <task_id>");
+      console.log("node todo.js complete <task_id>");
+      console.log("node todo.js uncomplete <task_id>");
+      console.log("node todo.js list:outstanding asc|desc");
+      console.log("node todo.js list:completed asc|desc");
       console.log(
-        "Mohon sertakan index task yang akan ditandai belum selesai."
+        "node todo.js tag <task_id> <tag_name_1> <tag_name_2> ...<tag_name_N"
       );
-      break;
-    }
-    uncomplete(parseInt(args[0]));
-    break;
-  case "list:outstanding":
-    listOutStanding(args[0] || "asc");
-    break;
-  case "list:completed":
-    listCompleted(args[0] || "asc");
-    break;
-  case "tag":
-    if (args.length < 2) {
-      console.log("Mohon sertakan index task dan tag yang akan ditambahkan");
-      break;
-    }
-    const index = parseInt(args[0]);
-    const tags = args.slice(1);
-    tag(index, ...tags);
-    break;
-  case "filter":
-    if (args.length === 0) {
-      console.log("Mohon sertakan tag yang akan difilter.");
-      break;
-    }
-    filter(args[0]);
-    break;
-  default:
-    console.log(">>> JS TODO <<<");
-    console.log("node todo.js <command>");
-    console.log("node todo.js list");
-    console.log("node todo.js task <task_id>");
-    console.log("node todo.js add <task_content>");
-    console.log("node todo.js delete <task_id>");
-    console.log("node todo.js complete <task_id>");
-    console.log("node todo.js uncomplete <task_id>");
-    console.log("node todo.js list:outstanding asc|desc");
-    console.log("node todo.js list:completed asc|desc");
-    console.log(
-      "node todo.js tag <task_id> <tag_name_1> <tag_name_2> ...<tag_name_N"
-    );
-    console.log("node todo.js filter:<tag_name>");
+      console.log("node todo.js filter:<tag_name>");
+  }
 }
+
+// Panggil function (main) untuk memulai Aplikasi
+main();
 
 /* 
   1. Helper nya diperbaiki
